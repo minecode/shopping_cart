@@ -481,11 +481,16 @@ export default function ProductScreen(props) {
 									key={i}>
 									<Text
 										style={{
-											fontSize: 20
+											fontSize: 20,
+											flex: 7
 										}}>
 										{s.Name + ' - ' + s.Brand.Name}
 									</Text>
-									<View style={{ flexDirection: 'row' }}>
+									<View
+										style={{
+											flexDirection: 'row',
+											flex: 2
+										}}>
 										<TouchableOpacity
 											style={{
 												backgroundColor: 'orange',

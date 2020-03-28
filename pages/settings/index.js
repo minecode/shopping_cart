@@ -14,12 +14,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Modal from 'react-native-modal';
 import styles from '../../style';
 import { SocialIcon, Input, Icon } from 'react-native-elements';
+import { AD_MOB_UNIT_ID } from 'react-native-dotenv';
+import { setTestDeviceIDAsync, AdMobBanner } from 'expo-ads-admob';
 
 function SettingsScreen(props) {
 	const [loading, setLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 
-	useEffect(() => {}, []);
+	useEffect(() => {
+		setTestDeviceIDAsync('EMULATOR');
+	}, []);
 
 	const onRefresh = React.useCallback(() => {
 		setRefreshing(true);
@@ -30,6 +34,12 @@ function SettingsScreen(props) {
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
+			<AdMobBanner
+				bannerSize='fullBanner'
+				adUnitID={AD_MOB_UNIT_ID} // Test ID, Replace with your-admob-unit-id
+				servePersonalizedAds // true or false
+				bannerSize={'smartBannerLandscape'}
+			/>
 			<Modal
 				isVisible={loading}
 				coverScreen={false}

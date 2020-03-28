@@ -18,6 +18,8 @@ import { SocialIcon, Input, Icon } from 'react-native-elements';
 import { LineChart, Grid, YAxis } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import { Circle, G, Line, Rect, Text as SVG_Text } from 'react-native-svg';
+import { AD_MOB_UNIT_ID } from 'react-native-dotenv';
+import { setTestDeviceIDAsync, AdMobBanner } from 'expo-ads-admob';
 
 function ReportScreen(props) {
 	const [token, setToken] = useState(null);
@@ -78,11 +80,21 @@ function ReportScreen(props) {
 			}
 			quantity = purchase.quantity;
 		}
-		return (
-			(purchase.Price / quantity).toFixed(2) +
-			purchase.Currency +
-			(purchase.unit === 'ml' ? '/L' : '/Kg')
-		);
+
+		if (purchase.unit === 'ml' || purchase.unit === 'g') {
+			return (
+				(purchase.Price / quantity).toFixed(2) +
+				purchase.Currency +
+				(purchase.unit === 'ml' ? '/L' : '/Kg')
+			);
+		} else {
+			return (
+				(purchase.Price / quantity).toFixed(2) +
+				purchase.Currency +
+				'/' +
+				capitalize(purchase.unit)
+			);
+		}
 	}
 
 	async function deletePurchase(id) {
@@ -147,6 +159,10 @@ function ReportScreen(props) {
 			getProducts(pickerProduct, pickerBrand, pickerStore);
 		}
 	}, [pickerProduct, pickerBrand, pickerStore, purchases]);
+
+	function capitalize(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+	}
 
 	async function getProducts(product, brand, store) {
 		setLoading(true);
@@ -220,7 +236,7 @@ function ReportScreen(props) {
 				by = element.Currency + '/unidade';
 			} else if (element.unit === 'kg' || element.unit === 'l') {
 				price = element.Price / element.quantity;
-				by = element.Currency + (element.unit === 'ml' ? '/L' : '/Kg');
+				by = element.Currency + '/' + capitalize(element.unit);
 			}
 
 			if (price) {
@@ -273,6 +289,7 @@ function ReportScreen(props) {
 	}
 
 	useEffect(() => {
+		setTestDeviceIDAsync('EMULATOR');
 		if (token != null) {
 			getPurchases();
 		}
@@ -406,6 +423,12 @@ function ReportScreen(props) {
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
+			<AdMobBanner
+				bannerSize='fullBanner'
+				adUnitID={AD_MOB_UNIT_ID} // Test ID, Replace with your-admob-unit-id
+				servePersonalizedAds // true or false
+				bannerSize={'smartBannerLandscape'}
+			/>
 			<Modal
 				isVisible={loading}
 				coverScreen={false}

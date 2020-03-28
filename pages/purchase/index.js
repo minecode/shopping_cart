@@ -16,6 +16,8 @@ import { post, get, put, remove } from '../../services/api';
 import Modal from 'react-native-modal';
 import styles from '../../style';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { AD_MOB_UNIT_ID } from 'react-native-dotenv';
+import { setTestDeviceIDAsync, AdMobBanner } from 'expo-ads-admob';
 
 function PurchaseScreen(props) {
 	const { navigate } = props.navigation;
@@ -348,6 +350,7 @@ function PurchaseScreen(props) {
 
 	useEffect(() => {
 		setSuccessMessage(null);
+		setTestDeviceIDAsync('EMULATOR');
 		getToken();
 		setPickerUnit('ml');
 		setPickerCurrency('€');
@@ -380,6 +383,12 @@ function PurchaseScreen(props) {
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
+			<AdMobBanner
+				bannerSize='fullBanner'
+				adUnitID={AD_MOB_UNIT_ID} // Test ID, Replace with your-admob-unit-id
+				servePersonalizedAds // true or false
+				bannerSize={'smartBannerLandscape'}
+			/>
 			<Modal
 				isVisible={loading}
 				coverScreen={false}

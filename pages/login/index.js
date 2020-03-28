@@ -18,8 +18,10 @@ import Modal from 'react-native-modal';
 import {
 	ANDROID_CLIENT_ID,
 	ANDROID_STANDALONE_APP_CLIENT_ID,
-	FACEBOOK_APP_ID
+	FACEBOOK_APP_ID,
+	AD_MOB_UNIT_ID
 } from 'react-native-dotenv';
+import { setTestDeviceIDAsync, AdMobBanner } from 'expo-ads-admob';
 
 function LoginScreen(props) {
 	const [loginGoogleError, setLoginGoogleError] = useState(null);
@@ -93,7 +95,7 @@ function LoginScreen(props) {
 		setLoginFacebookError(null);
 		setLoading(true);
 		try {
-			await Facebook.initializeAsync({ FACEBOOK_APP_ID });
+			await Facebook.initializeAsync(String(FACEBOOK_APP_ID));
 			const {
 				type,
 				token,
@@ -127,9 +129,9 @@ function LoginScreen(props) {
 						);
 					}
 				});
-		} catch ({ message }) {
+		} catch (error) {
 			setLoading(false);
-			console.log(message);
+			console.log(error);
 			setLoginFacebookError('Ocorreu um erro durante a autenticação');
 			// Alert.alert(`Facebook Login Error: ${message}`);
 		}
@@ -201,10 +203,17 @@ function LoginScreen(props) {
 
 	useEffect(() => {
 		getToken();
+		setTestDeviceIDAsync('EMULATOR');
 	}, []);
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
+			<AdMobBanner
+				bannerSize='fullBanner'
+				adUnitID={AD_MOB_UNIT_ID} // Test ID, Replace with your-admob-unit-id
+				servePersonalizedAds // true or false
+				bannerSize={'smartBannerLandscape'}
+			/>
 			<Modal
 				isVisible={loading}
 				coverScreen={false}

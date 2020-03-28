@@ -21,6 +21,8 @@ import { Defs, LinearGradient, Stop } from 'react-native-svg';
 import * as scale from 'd3-scale';
 import * as shape from 'd3-shape';
 import { element } from 'prop-types';
+import { AD_MOB_UNIT_ID } from 'react-native-dotenv';
+import { setTestDeviceIDAsync, AdMobBanner } from 'expo-ads-admob';
 
 function HomeScreen(props) {
 	const { navigate } = props.navigation;
@@ -340,6 +342,7 @@ function HomeScreen(props) {
 
 	useEffect(() => {
 		setLoading(true);
+		setTestDeviceIDAsync('EMULATOR');
 		getToken();
 		setLoading(false);
 	}, []);
@@ -431,6 +434,12 @@ function HomeScreen(props) {
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
+			<AdMobBanner
+				bannerSize='fullBanner'
+				adUnitID={AD_MOB_UNIT_ID} // Test ID, Replace with your-admob-unit-id
+				servePersonalizedAds // true or false
+				bannerSize={'smartBannerLandscape'}
+			/>
 			<ScrollView
 				refreshControl={
 					<RefreshControl
