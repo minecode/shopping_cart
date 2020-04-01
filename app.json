@@ -5,7 +5,7 @@
 		"privacy": "public",
 		"sdkVersion": "36.0.0",
 		"platforms": ["ios", "android", "web"],
-		"version": "5.0.0",
+		"version": "6.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/sc_icon.png",
 		"splash": {
@@ -29,9 +29,9 @@
 		},
 		"android": {
 			"package": "pt.fhenriques.shopping_cart",
-			"versionCode": 5,
+			"versionCode": 6,
 			"config": {
-				"googleMobileAdsAppId": "${process.env.GOOGLE_MOBILE_ADS_APP_ID}",
+				"googleMobileAdsAppId": "${GOOGLE_MOBILE_ADS_APP_ID}",
 				"googleSignIn": {
 					"apiKey": "${GOOGLE_SIGN_IN_API_KEY}",
 					"certificateHash": "${GOOGLE_SIGN_IN_CERTIFICATE_HASH}"
