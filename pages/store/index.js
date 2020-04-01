@@ -43,7 +43,10 @@ export default function StoreScreen(props) {
 				}
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -67,7 +70,10 @@ export default function StoreScreen(props) {
 				setStores(result.data);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -86,7 +92,10 @@ export default function StoreScreen(props) {
 				setLoading(false);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -115,7 +124,10 @@ export default function StoreScreen(props) {
 				setLoading(false);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -151,7 +163,7 @@ export default function StoreScreen(props) {
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
 			<Modal
-				isVisible={loading}
+				isVisible={false}
 				coverScreen={false}
 				backdropColor={'white'}
 				backdropOpacity={0.8}>

@@ -21,6 +21,8 @@ export default function ShareScreen(props) {
 	const [name, setName] = useState(null);
 	const [email, setEmail] = useState(null);
 	const [id, setIdEdit] = useState(null);
+	const [invites, setInvites] = useState(null);
+	const [ownInvites, setOwnInvites] = useState(null);
 	const [buttonText, setButtonText] = useState('Criar novo grupo');
 	const [buttonIcon, setButtonIcon] = useState('plus');
 	const [emailError, setEmailError] = useState(null);
@@ -94,6 +96,12 @@ export default function ShareScreen(props) {
 		return await remove('/api/group/' + id + '/', {}, token)
 			.then(result => {
 				if (token !== null) {
+					setName(null);
+					setIdEdit(null);
+					setInvites(null);
+					setMembers(null);
+					setButtonIcon('plus');
+					setButtonText('Criar novo grupo');
 					getGroups();
 				}
 				setLoading(false);
@@ -111,10 +119,12 @@ export default function ShareScreen(props) {
 	async function updateGroup(id) {
 		setLoading(true);
 		setNameError(null);
-		return await put('/api/product/' + id + '/', { Name: name }, token)
+		return await put('/api/group/' + id + '/', { Name: name }, token)
 			.then(result => {
 				setName(null);
 				setIdEdit(null);
+				setInvites(null);
+				setMembers(null);
 				setButtonIcon('plus');
 				setButtonText('Criar novo grupo');
 				if (token !== null) {
@@ -175,7 +185,17 @@ export default function ShareScreen(props) {
 			});
 	}
 
-	async function addMember() {
+	async function getInvitedMembers(group_id) {
+		return await get('/api/invite/' + group_id + '/', {}, token)
+			.then(response => {
+				setInvites(response.data);
+			})
+			.catch(error => {
+				console.log(error);
+			});
+	}
+
+	async function inviteMember() {
 		setLoading(true);
 		setEmailError(null);
 		setNameError(null);
@@ -183,21 +203,26 @@ export default function ShareScreen(props) {
 		var exists = user_insert !== undefined;
 		if (exists) {
 			return await post(
-				'/api/groupmembers/',
+				'/api/invite/',
 				{ User: user_insert.id, Group: id },
 				token
 			)
-				.then(response => {
-					setName(null);
+				.then(async response => {
+					// setName(null);
 					setEmail(null);
-					setIdEdit(null);
-					setButtonIcon('plus');
-					setButtonText('Criar novo grupo');
+					await getInvitedMembers(id);
+					// setIdEdit(null);
+					// setButtonIcon('plus');
+					// setButtonText('Criar novo grupo');
 					setLoading(false);
 				})
 				.catch(async error => {
 					setLoading(false);
-					if (error.status === 401) {
+					console.log(error);
+					if (
+						error.status === 401 &&
+						error.data.detail === 'Signature has expired.'
+					) {
 						await AsyncStorage.removeItem('@shopping_cart:token');
 						navigate({ name: 'Login' });
 					}
@@ -208,9 +233,24 @@ export default function ShareScreen(props) {
 		setLoading(false);
 	}
 
-	async function getMembersOfGroup(id) {
+	async function deleteInvite(invite_id, group_id = null) {
 		setLoading(true);
-		return await get('/api/groupmembers/' + id + '/', {}, token)
+		return await remove('/api/invite/' + String(invite_id) + '/', {}, token)
+			.then(async response => {
+				if (group_id !== null) {
+					await getInvitedMembers(group_id);
+				}
+				setLoading(false);
+			})
+			.catch(error => {
+				setLoading(false);
+				console.log(error);
+			});
+	}
+
+	async function getMembersOfGroup(group_id) {
+		setLoading(true);
+		return await get('/api/groupmembers/' + group_id + '/', {}, token)
 			.then(response => {
 				setMembers(response.data);
 				setLoading(false);
@@ -221,6 +261,46 @@ export default function ShareScreen(props) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
+			});
+	}
+
+	async function getOwnInvites() {
+		setLoading(true);
+		return await get('/api/invite/', {}, token)
+			.then(response => {
+				setLoading(false);
+				setOwnInvites(response.data);
+			})
+			.catch(error => {
+				setLoading(false);
+				console.log(error);
+			});
+	}
+
+	async function aceptInvite(invite_id) {
+		setLoading(true);
+		return await put('/api/invite/' + invite_id + '/', {}, token)
+			.then(async response => {
+				setLoading(false);
+				console.log(response);
+				await getOwnInvites();
+			})
+			.catch(error => {
+				setLoading(false);
+				console.log(error);
+			});
+	}
+
+	async function deleteMember(relation_id) {
+		setLoading(true);
+		return await remove('/api/groupmembers/' + relation_id + '/', {}, token)
+			.then(async response => {
+				setLoading(false);
+				await getMembersOfGroup(id);
+			})
+			.catch(error => {
+				setLoading(false);
+				console.log(error);
 			});
 	}
 
@@ -235,7 +315,7 @@ export default function ShareScreen(props) {
 		} else {
 			setDisplayState('none');
 		}
-	}, [id, members]);
+	}, [id, members, invites]);
 
 	useEffect(() => {
 		setLoading(true);
@@ -243,6 +323,7 @@ export default function ShareScreen(props) {
 			getGroups();
 			getUsers();
 			getUser();
+			getOwnInvites();
 		}
 		setLoading(false);
 	}, [token]);
@@ -253,6 +334,12 @@ export default function ShareScreen(props) {
 			getGroups();
 			getUsers();
 			getUser();
+			getOwnInvites();
+			setName(null);
+			setNameError(null);
+			setIdEdit(null);
+			setButtonIcon('plus');
+			setButtonText('Criar novo grupo');
 		}
 		setRefreshing(false);
 	}, [refreshing]);
@@ -260,7 +347,7 @@ export default function ShareScreen(props) {
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
 			<Modal
-				isVisible={loading}
+				isVisible={false}
 				coverScreen={false}
 				backdropColor={'white'}
 				backdropOpacity={0.8}>
@@ -356,6 +443,146 @@ export default function ShareScreen(props) {
 						</TouchableOpacity>
 					</View>
 
+					{ownInvites && ownInvites.length !== 0 && (
+						<View
+							style={[
+								styles.row,
+								{
+									marginTop: 20,
+									display: 'flex'
+								}
+							]}>
+							<View
+								style={{
+									flexDirection: 'row',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									marginBottom: 10
+								}}>
+								<Icon
+									name='envelope'
+									type='font-awesome'
+									color={'#5f7d9d'}
+								/>
+								<Text
+									style={{
+										fontWeight: 'bold',
+										fontSize: 20,
+										color: '#5f7d9d'
+									}}>
+									{' '}
+									Convites pendentes:{' '}
+								</Text>
+							</View>
+						</View>
+					)}
+
+					{ownInvites &&
+						ownInvites.length !== 0 &&
+						ownInvites.map((invite, i) => {
+							return (
+								<View
+									key={i}
+									style={[
+										styles.row,
+										{
+											display: 'flex'
+										}
+									]}>
+									<Text
+										style={{
+											fontSize: 20,
+											marginVertical: 5,
+											paddingLeft: 10
+										}}>
+										{invite.Group.Name}
+									</Text>
+									{invite.User.id === user.id && (
+										<View style={{ flexDirection: 'row' }}>
+											<TouchableOpacity
+												style={{
+													backgroundColor: 'green',
+													height: 30,
+													width: 30,
+													justifyContent: 'center',
+													borderRadius: 60,
+													padding: 5,
+													marginRight: 5
+												}}
+												onPress={async () => {
+													await aceptInvite(
+														invite.id
+													);
+												}}>
+												<Icon
+													name='check'
+													size={17}
+													color={'white'}
+													type='font-awesome'
+												/>
+											</TouchableOpacity>
+											<TouchableOpacity
+												style={{
+													backgroundColor: 'red',
+													height: 30,
+													width: 30,
+													justifyContent: 'center',
+													borderRadius: 60,
+													padding: 5,
+													marginLeft: 5
+												}}
+												onPress={async () => {
+													await deleteInvite(
+														invite.id
+													);
+												}}>
+												<Icon
+													name='times'
+													size={17}
+													color={'white'}
+													type='font-awesome'
+												/>
+											</TouchableOpacity>
+										</View>
+									)}
+								</View>
+							);
+						})}
+
+					{groups && groups.length !== 0 && (
+						<View
+							style={[
+								styles.row,
+								{
+									marginTop: 20,
+									display: 'flex'
+								}
+							]}>
+							<View
+								style={{
+									flexDirection: 'row',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									marginBottom: 10
+								}}>
+								<Icon
+									name='users'
+									type='font-awesome'
+									color={'#5f7d9d'}
+								/>
+								<Text
+									style={{
+										fontWeight: 'bold',
+										fontSize: 20,
+										color: '#5f7d9d'
+									}}>
+									{' '}
+									Grupos:{' '}
+								</Text>
+							</View>
+						</View>
+					)}
+
 					{groups &&
 						groups.map((s, i) => {
 							return (
@@ -387,6 +614,9 @@ export default function ShareScreen(props) {
 												}}
 												onPress={async () => {
 													await getMembersOfGroup(
+														s.id
+													);
+													await getInvitedMembers(
 														s.id
 													);
 													setIdEdit(s.id);
@@ -457,24 +687,6 @@ export default function ShareScreen(props) {
 								Membros:{' '}
 							</Text>
 						</View>
-
-						{/* <Picker
-							selectedValue={pickerUser}
-							style={{ width: 150, color: '#526b78' }}
-							onValueChange={(itemValue, itemIndex) => {
-								setPickerUser(itemValue);
-							}}>
-							{users &&
-								users.map((p, i) => {
-									return (
-										<Picker.Item
-											key={i}
-											label={p.username}
-											value={p.id}
-										/>
-									);
-								})}
-						</Picker> */}
 					</View>
 
 					{members &&
@@ -492,12 +704,120 @@ export default function ShareScreen(props) {
 									]}>
 									<Text
 										style={{
-											fontSize: 15,
-											marginVertical: 2,
+											fontSize: 20,
+											marginVertical: 5,
 											paddingLeft: 10
 										}}>
 										{m.User.username}
 									</Text>
+									{(m.User.id === user.id ||
+										m.Group.CreatedBy === user.id) && (
+										<TouchableOpacity
+											style={{
+												backgroundColor: 'red',
+												height: 30,
+												width: 30,
+												justifyContent: 'center',
+												borderRadius: 60,
+												padding: 5,
+												marginRight: 5
+											}}
+											onPress={async () => {
+												await deleteMember(m.id);
+											}}>
+											<Icon
+												name='times'
+												size={17}
+												color={'white'}
+												type='font-awesome'
+											/>
+										</TouchableOpacity>
+									)}
+								</View>
+							);
+						})}
+					{invites && invites.length !== 0 && (
+						<View
+							style={[
+								styles.row,
+								{
+									marginTop: 20,
+									display: displayState
+										? displayState
+										: 'flex'
+								}
+							]}>
+							<View
+								style={{
+									flexDirection: 'row',
+									alignItems: 'center',
+									justifyContent: 'space-between',
+									marginBottom: 10
+								}}>
+								<Icon
+									name='envelope'
+									type='font-awesome'
+									color={'#5f7d9d'}
+								/>
+								<Text
+									style={{
+										fontWeight: 'bold',
+										fontSize: 20,
+										color: '#5f7d9d'
+									}}>
+									{' '}
+									Convites:{' '}
+								</Text>
+							</View>
+						</View>
+					)}
+					{invites &&
+						invites.length !== 0 &&
+						invites.map((invite, i) => {
+							return (
+								<View
+									key={i}
+									style={[
+										styles.row,
+										{
+											display: displayState
+												? displayState
+												: 'flex'
+										}
+									]}>
+									<Text
+										style={{
+											fontSize: 20,
+											marginVertical: 5,
+											paddingLeft: 10
+										}}>
+										{invite.User.username}
+									</Text>
+									{invite.CreatedBy.id === user.id && (
+										<TouchableOpacity
+											style={{
+												backgroundColor: 'red',
+												height: 30,
+												width: 30,
+												justifyContent: 'center',
+												borderRadius: 60,
+												padding: 5,
+												marginRight: 5
+											}}
+											onPress={async () => {
+												await deleteInvite(
+													invite.id,
+													(group_id = invite.Group.id)
+												);
+											}}>
+											<Icon
+												name='times'
+												size={17}
+												color={'white'}
+												type='font-awesome'
+											/>
+										</TouchableOpacity>
+									)}
 								</View>
 							);
 						})}
@@ -538,7 +858,7 @@ export default function ShareScreen(props) {
 									flexDirection: 'row'
 								}}
 								onPress={async () => {
-									await addMember();
+									await inviteMember();
 								}}>
 								<Icon
 									name={'plus'}

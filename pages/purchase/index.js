@@ -107,7 +107,10 @@ function PurchaseScreen(props) {
 				setLoading(false);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -124,7 +127,10 @@ function PurchaseScreen(props) {
 				setLoading(false);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -159,7 +165,10 @@ function PurchaseScreen(props) {
 				setLoading(false);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -267,7 +276,10 @@ function PurchaseScreen(props) {
 				// console.log(result);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -390,7 +402,7 @@ function PurchaseScreen(props) {
 				bannerSize={'smartBannerLandscape'}
 			/>
 			<Modal
-				isVisible={loading}
+				isVisible={false}
 				coverScreen={false}
 				backdropColor={'white'}
 				backdropOpacity={0.8}>

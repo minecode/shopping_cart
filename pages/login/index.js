@@ -215,7 +215,7 @@ function LoginScreen(props) {
 				bannerSize={'smartBannerLandscape'}
 			/>
 			<Modal
-				isVisible={loading}
+				isVisible={false}
 				coverScreen={false}
 				backdropColor={'white'}
 				backdropOpacity={0.8}>

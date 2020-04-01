@@ -332,7 +332,10 @@ function HomeScreen(props) {
 			})
 			.catch(async error => {
 				setLoading(false);
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -364,7 +367,10 @@ function HomeScreen(props) {
 			})
 			.catch(async error => {
 				setLoading(false);
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}

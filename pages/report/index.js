@@ -107,7 +107,10 @@ function ReportScreen(props) {
 				setLoading(false);
 			})
 			.catch(async error => {
-				if (error.status === 401) {
+				if (
+					error.status === 401 &&
+					error.data.detail === 'Signature has expired.'
+				) {
 					await AsyncStorage.removeItem('@shopping_cart:token');
 					navigate({ name: 'Login' });
 				}
@@ -367,14 +370,14 @@ function ReportScreen(props) {
 					});
 					temp_products.push({ Name: key, id: id });
 				}
-
-				temp_products.push({ Name: 'Qualquer', id: '-1' });
 				temp_products = temp_products.sort((a, b) => {
+					console.log(a, b);
 					if (String(a.Name) > String(b.Name)) {
 						return 1;
 					}
 					return -1;
 				});
+
 				let new_temp_products = [];
 				new_temp_products.push({ Name: 'Qualquer', id: '-1' });
 				temp_products.forEach(element => {
@@ -430,7 +433,7 @@ function ReportScreen(props) {
 				bannerSize={'smartBannerLandscape'}
 			/>
 			<Modal
-				isVisible={loading}
+				isVisible={false}
 				coverScreen={false}
 				backdropColor={'white'}
 				backdropOpacity={0.8}>

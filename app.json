@@ -5,7 +5,7 @@
 		"privacy": "public",
 		"sdkVersion": "36.0.0",
 		"platforms": ["ios", "android", "web"],
-		"version": "4.0.0",
+		"version": "5.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/sc_icon.png",
 		"splash": {
@@ -29,7 +29,7 @@
 		},
 		"android": {
 			"package": "pt.fhenriques.shopping_cart",
-			"versionCode": 4,
+			"versionCode": 5,
 			"config": {
 				"googleMobileAdsAppId": "${process.env.GOOGLE_MOBILE_ADS_APP_ID}",
 				"googleSignIn": {
