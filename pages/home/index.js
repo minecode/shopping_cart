@@ -410,20 +410,6 @@ function HomeScreen(props) {
 		return day + '-' + month + '-' + year;
 	}
 
-	function formatDate(date) {
-		var d = new Date(date),
-			month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			minutes = d.getMinutes();
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-
-		return day + '-' + month + '-' + year + ' ' + hour + ':' + minutes;
-	}
-
 	const Gradient = ({ index }) => (
 		<Defs key={index}>
 			<LinearGradient
@@ -524,8 +510,7 @@ function HomeScreen(props) {
 									return (
 										<View
 											style={{
-												marginHorizontal: 5,
-												justifyContent: 'center'
+												marginHorizontal: 5
 											}}
 											key={i}>
 											<View
@@ -551,9 +536,9 @@ function HomeScreen(props) {
 														color: element.svg.fill,
 														marginLeft: 10
 													}}>
-													{element.name}{' '}
 													{element.spend}
-													{element.currency}
+													{element.currency}{' '}
+													{element.name}
 												</Text>
 											</View>
 										</View>
@@ -614,9 +599,9 @@ function HomeScreen(props) {
 														color: element.svg.fill,
 														marginLeft: 10
 													}}>
-													{element.name}{' '}
 													{element.spend}
-													{element.currency}
+													{element.currency}{' '}
+													{element.name}
 												</Text>
 											</View>
 										</View>
@@ -677,9 +662,9 @@ function HomeScreen(props) {
 														color: element.svg.fill,
 														marginLeft: 10
 													}}>
-													{element.name}{' '}
 													{element.spend}
-													{element.currency}
+													{element.currency}{' '}
+													{element.name}
 												</Text>
 											</View>
 										</View>
@@ -825,7 +810,7 @@ function HomeScreen(props) {
 												fontSize: 10,
 												color: 'grey'
 											}}>
-											{formatDate(s.Timestamp)}
+											{formatDateDays(s.Timestamp)}
 										</Text>
 									</View>
 									<View

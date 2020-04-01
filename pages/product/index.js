@@ -19,6 +19,7 @@ import styles from '../../style';
 export default function ProductScreen(props) {
 	const [token, setToken] = useState(null);
 	const [products, setProducts] = useState(null);
+	const [displayProducts, setDisplayProducts] = useState(null);
 	const [categories, setCategories] = useState(null);
 	const [pickerCategory, setPickerCategory] = useState(null);
 	const [pickerBrand, setPickerBrand] = useState(null);
@@ -32,7 +33,7 @@ export default function ProductScreen(props) {
 	const [refreshing, setRefreshing] = useState(true);
 	const [categoryError, setCategoryError] = useState(null);
 	const [loading, setLoading] = useState(false);
-
+	const [search, setSearch] = useState(null);
 	const { height, width } = Dimensions.get('window');
 
 	async function getToken() {
@@ -98,6 +99,7 @@ export default function ProductScreen(props) {
 		return await get('/api/product/', {}, token)
 			.then(result => {
 				setProducts(result.data);
+				setDisplayProducts(result.data);
 			})
 			.catch(async error => {
 				if (
@@ -244,6 +246,21 @@ export default function ProductScreen(props) {
 		}
 		setLoading(false);
 	}, [token]);
+
+	useEffect(() => {
+		if (search === null || search.length === 0) {
+			setDisplayProducts(products);
+		} else {
+			setDisplayProducts(
+				products.filter(function(el) {
+					return (
+						el.Brand.Name.includes(search) ||
+						el.Name.includes(search)
+					);
+				})
+			);
+		}
+	}, [search]);
 
 	const onRefresh = () => {
 		setRefreshing(true);
@@ -483,8 +500,38 @@ export default function ProductScreen(props) {
 							</Text>
 						</TouchableOpacity>
 					</View>
-					{products &&
-						products.map((s, i) => {
+
+					<View style={[styles.row, { marginBottom: 20 }]}>
+						<View
+							style={{
+								backgroundColor: 'green',
+								height: 40,
+								width: 40,
+								justifyContent: 'center',
+								borderRadius: 80,
+								padding: 5,
+								marginRight: 5
+							}}>
+							<Icon
+								name='search'
+								size={20}
+								color={'white'}
+								type='font-awesome'
+							/>
+						</View>
+						<View style={{ flex: 5 }}>
+							<Input
+								placeholder='Pesquisar'
+								onChangeText={text => {
+									setSearch(text);
+								}}
+								value={search}
+							/>
+						</View>
+					</View>
+
+					{displayProducts &&
+						displayProducts.map((s, i) => {
 							return (
 								<View
 									style={[
@@ -500,18 +547,18 @@ export default function ProductScreen(props) {
 									<Text
 										style={{
 											fontSize: 20,
-											flex: 7
+											flex: 8
 										}}>
 										{s.Name + ' - ' + s.Brand.Name}
 									</Text>
 									<View
 										style={{
 											flexDirection: 'row',
-											flex: 2
+											flex: 4
 										}}>
 										<TouchableOpacity
 											style={{
-												backgroundColor: 'orange',
+												backgroundColor: 'blue',
 												height: 30,
 												width: 30,
 												justifyContent: 'center',
@@ -520,7 +567,37 @@ export default function ProductScreen(props) {
 												marginRight: 5
 											}}
 											onPress={() => {
+												setPickerBrand(s.Brand.id);
+												setPickerCategory(
+													s.Category.id
+												);
+												setName(s.Name);
+												setButtonIcon('plus');
+												setButtonText('Adicionar');
+											}}>
+											<Icon
+												name='copy'
+												size={17}
+												color={'white'}
+												type='font-awesome'
+											/>
+										</TouchableOpacity>
+										<TouchableOpacity
+											style={{
+												backgroundColor: 'orange',
+												height: 30,
+												width: 30,
+												justifyContent: 'center',
+												borderRadius: 60,
+												padding: 5,
+												marginRight: 5,
+												marginLeft: 5
+											}}
+											onPress={() => {
 												setIdEdit(s.id);
+												setPickerCategory(
+													s.Category.id
+												);
 												setPickerBrand(s.Brand.id);
 												setName(s.Name);
 												setButtonIcon('pencil');

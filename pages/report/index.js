@@ -131,20 +131,6 @@ function ReportScreen(props) {
 		return day + '-' + month + '-' + year;
 	}
 
-	function formatDate(date) {
-		var d = new Date(date),
-			month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			minutes = d.getMinutes();
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-
-		return day + '-' + month + '-' + year + ' ' + hour + ':' + minutes;
-	}
-
 	const onRefresh = () => {
 		setRefreshing(true);
 		getPurchases();
@@ -227,6 +213,13 @@ function ReportScreen(props) {
 		let units = null;
 		let by = null;
 		let temp_data = [];
+		temp = temp.sort((a, b) => {
+			if (a.Timestamp > b.Timestamp) {
+				return 1;
+			} else {
+				return -1;
+			}
+		});
 		temp.forEach(element => {
 			let quantity = null;
 			let price = null;
@@ -272,7 +265,6 @@ function ReportScreen(props) {
 				temp_data.push(price);
 			}
 		});
-
 		setData(temp_data);
 
 		med = med / idx;
@@ -371,7 +363,6 @@ function ReportScreen(props) {
 					temp_products.push({ Name: key, id: id });
 				}
 				temp_products = temp_products.sort((a, b) => {
-					console.log(a, b);
 					if (String(a.Name) > String(b.Name)) {
 						return 1;
 					}
@@ -718,7 +709,7 @@ function ReportScreen(props) {
 												fontSize: 10,
 												color: 'grey'
 											}}>
-											{formatDate(s.Timestamp)}
+											{formatDateDays(s.Timestamp)}
 										</Text>
 									</View>
 									<View
